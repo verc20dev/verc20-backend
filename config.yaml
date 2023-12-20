@@ -1,0 +1,12 @@
+dbHost: "localhost"
+dbPort: 5432
+dbUser: "postgres"
+dbPassword: "postgres"
+dbDatabase: "postgres"
+rpcUrl: "http://127.0.0.1:8545"
+logLevel: "info"
+syncInterval: 10
+indexInterval: 10
+port: 8080
+marketAddress: "0x0165878A594ca255338adfa4d48449f69242Eb8F"
+wssUrl: "ws://127.0.0.1:8545"

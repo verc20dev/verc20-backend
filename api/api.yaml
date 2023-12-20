@@ -1,0 +1,376 @@
+openapi: 3.0.3
+info:
+  title: Indexer Server API
+  version: 1.0.0
+tags:
+  - name: token
+    description: Token
+  - name: holder
+    description: Holder
+paths:
+    /tokens:
+      get:
+        tags:
+          - token
+        summary: list token
+        operationId: listToken
+        parameters:
+          - name: limit
+            in: query
+            required: false
+            schema:
+              type: integer
+              minimum: 1
+              maximum: 100
+              default: 10
+          - name: offset
+            in: query
+            required: false
+            schema:
+              type: integer
+              minimum: 0
+              default: 0
+          - name: sort
+            in: query
+            required: false
+            schema:
+              type: string
+              enum:
+                - id
+                - name
+                - symbol
+                - total_supply
+                - created_at
+                - updated_at
+              default: id
+          - name: order
+            in: query
+            required: false
+            schema:
+              type: string
+              enum:
+                - asc
+                - desc
+              default: asc
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ListTokenResponse'
+    /tokens/{name}:
+      get:
+        tags:
+          - token
+        summary: get token
+        operationId: getToken
+        parameters:
+          - name: name
+            in: path
+            required: true
+            schema:
+              type: string
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/TokenDetail'
+    /tokens/{name}/holders:
+      get:
+        tags:
+          - token
+        summary: list token holders
+        operationId: listTokenHolders
+        parameters:
+          - name: name
+            in: path
+            required: true
+            schema:
+              type: string
+          - name: limit
+            in: query
+            required: false
+            schema:
+              type: integer
+              minimum: 1
+              maximum: 100
+              default: 10
+          - name: offset
+            in: query
+            required: false
+            schema:
+              type: integer
+              minimum: 0
+              default: 0
+          - name: sort
+            in: query
+            required: false
+            schema:
+              type: string
+              enum:
+                - rank
+                - address
+                - balance
+              default: rank
+          - name: order
+            in: query
+            required: false
+            schema:
+              type: string
+              enum:
+                - asc
+                - desc
+              default: asc
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ListTokenHolderResponse'
+    /tokens/{name}/histories:
+      get:
+        tags:
+          - token
+        summary: list token histories
+        operationId: listTokenHistories
+        parameters:
+          - name: name
+            in: path
+            required: true
+            schema:
+              type: string
+          - name: address
+            in: query
+            required: false
+            schema:
+              type: string
+          - name: limit
+            in: query
+            required: false
+            schema:
+              type: integer
+              minimum: 1
+              maximum: 100
+              default: 10
+          - name: offset
+            in: query
+            required: false
+            schema:
+              type: integer
+              minimum: 0
+              default: 0
+          - name: sort
+            in: query
+            required: false
+            schema:
+              type: string
+              enum:
+                - rank
+                - address
+                - balance
+              default: rank
+          - name: order
+            in: query
+            required: false
+            schema:
+              type: string
+              enum:
+                - asc
+                - desc
+              default: asc
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ListTokenHistoryResponse'
+    /holders/{address}:
+      get:
+        tags:
+          - holder
+        summary: get holder
+        operationId: getHolder
+        parameters:
+          - name: address
+            in: path
+            required: true
+            schema:
+              type: string
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/TokenHolderInfo'
+    /status:
+      get:
+        tags:
+          - status
+        summary: get status
+        operationId: getStatus
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Status'
+components:
+  schemas:
+    TokenInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: token name
+        total_supply:
+          type: string
+          description: token total supply
+        minted:
+          type: string
+          description: token minted
+        holders:
+          type: integer
+          description: token holders
+        transactions:
+          type: integer
+          description: token transactions
+        created_at:
+          type: string
+          description: token created time
+
+    TokenDetail:
+      type: object
+      properties:
+        name:
+          type: string
+          description: token name
+        total_supply:
+          type: string
+          description: token total supply
+        decimals:
+          type: integer
+          description: token decimals
+        minted:
+          type: string
+          description: token minted
+        holders:
+          type: integer
+          description: token holders
+        transactions:
+          type: integer
+          description: token transactions
+        creation_tx:
+          type: string
+          description: token creation tx
+        created_at:
+          type: string
+          description: token created time
+        created_by:
+          type: string
+          description: token created by
+        minted_out_at:
+          type: string
+          description: token minted out time
+
+    TokenHolderInfo:
+      type: object
+      properties:
+        rank:
+          type: integer
+          description: token holder rank
+        address:
+          type: string
+          description: token holder address
+        balance:
+          type: string
+          description: token holder balance
+
+    HolderDetail:
+      type: object
+      properties:
+        tokens:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenHolding'
+
+    TokenHolding:
+      type: object
+      properties:
+        name:
+          type: string
+          description: token name
+        balance:
+          type: string
+          description: token balance
+
+    TokenHistoryInfo:
+      type: object
+      properties:
+        method:
+          type: string
+          description: history type
+        from:
+          type: string
+          description: from
+        to:
+          type: string
+          description: to
+        block_number:
+          type: integer
+          description: history block number
+        quantity:
+          type: string
+          description: history quantity
+        created_at:
+          type: string
+          description: token history created time
+        creation_tx:
+          type: string
+          description: token history creation tx
+
+    ListTokenResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: total token count
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenInfo'
+    ListTokenHolderResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: total token holder count
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenHolderInfo'
+    ListTokenHistoryResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: total token history count
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenHistoryInfo'
+    Status:
+      type: object
+      properties:
+        latest_synced_block:
+          type: integer
+          description: latest synced block number
+        latest_imported_block:
+          type: integer
+          description: latest imported block number
