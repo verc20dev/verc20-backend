@@ -26,6 +26,7 @@ func init() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
 
 	viper.SetDefault("rpcUrl", "http://localhost")
 	viper.SetDefault("dbHost", "localhost")
