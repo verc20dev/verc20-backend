@@ -26,7 +26,6 @@ func init() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
-	viper.AutomaticEnv()
 
 	viper.SetDefault("rpcUrl", "http://localhost")
 	viper.SetDefault("dbHost", "localhost")
@@ -40,6 +39,7 @@ func init() {
 	viper.SetDefault("indexInterval", 10)
 	viper.SetDefault("port", 8080)
 
+	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		var configFileNotFoundError viper.ConfigFileNotFoundError
