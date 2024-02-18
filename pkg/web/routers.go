@@ -64,6 +64,12 @@ func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 			handleFunctions.HolderAPI.GetHolder,
 		},
 		{
+			"GetHolder",
+			http.MethodGet,
+			"/holders/:address/histories",
+			handleFunctions.HolderAPI.ListHolderHistories,
+		},
+		{
 			"GetToken",
 			http.MethodGet,
 			"/tokens/:name",
@@ -124,10 +130,16 @@ func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 			handleFunctions.MarketAPI.GetOrderDetail,
 		},
 		{
-			"CancelOrder",
+			"ExecuteOrder",
 			http.MethodPost,
 			"/market/orders/:id/execute",
 			handleFunctions.MarketAPI.ExecuteOrder,
+		},
+		{
+			"FreezeOrder",
+			http.MethodPost,
+			"/market/orders/:id/freeze",
+			handleFunctions.MarketAPI.FreezeOrder,
 		},
 		{
 			"CancelOrder",

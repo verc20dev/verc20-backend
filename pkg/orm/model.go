@@ -97,6 +97,7 @@ type OrderModel struct {
 	ExecutedAt     uint64
 	Taker          string
 	Input          string
+	Sell		   bool
 }
 
 func (OrderModel) TableName() string {

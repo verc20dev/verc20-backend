@@ -48,6 +48,7 @@ func server(cmd *cobra.Command, args []string) {
 	dbPassword := viper.GetString("dbPassword")
 	dbName := viper.GetString("dbName")
 	dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPassword + " dbname=" + dbName + " port=" + dbPort
+	log.Info("dsn: ", dsn)
 	err = orm.InitDbClient(dsn)
 	if err != nil {
 		log.Fatal(err)

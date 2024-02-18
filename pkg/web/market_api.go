@@ -40,7 +40,23 @@ func (api *MarketAPI) ListOrders(c *gin.Context) {
 	if !ok || nameFilter == "" {
 		log.Error("tick is required, req: ", c.Request)
 		c.JSON(400, gin.H{"status": "Request is invalid"})
+		return
 	}
+
+	typeFilter, ok := c.GetQuery("type")
+	if !ok || typeFilter == "" {
+		log.Error("type is required, req: ", c.Request)
+		c.JSON(400, gin.H{"status": "Request is invalid"})
+		return
+	}
+
+	if typeFilter != "ask" && typeFilter != "bid" {
+		log.Error("type is invalid, req: ", c.Request)
+		c.JSON(400, gin.H{"status": "Request is invalid"})
+		return
+	}
+
+	sellFilter := typeFilter == "ask"
 
 	ownerFilter, haveOwnerFilter := c.GetQuery("owner")
 
@@ -53,15 +69,17 @@ func (api *MarketAPI) ListOrders(c *gin.Context) {
 		err = db.
 			Model(&orm.OrderModel{}).
 			Where(
-				"token_name = ? AND maker = ? AND executed != true AND canceled != true",
-				nameFilter, ownerFilter,
+				"token_name = ? AND maker = ? AND sell = ? AND executed != true AND canceled != true",
+				nameFilter, ownerFilter, sellFilter,
 			).
 			Count(&totalRow).
 			Error
 	} else {
 		err = db.
 			Model(&orm.OrderModel{}).
-			Where("token_name = ? AND executed != true AND canceled != true", nameFilter).
+			Where("token_name = ? AND sell = ? AND expiration_time > ? AND executed != true AND canceled != true",
+				nameFilter, sellFilter, time.Now().Unix(),
+			).
 			Count(&totalRow).
 			Error
 	}
@@ -74,7 +92,8 @@ func (api *MarketAPI) ListOrders(c *gin.Context) {
 
 	if haveOwnerFilter {
 		err = db.
-			Where("token_name = ? AND maker = ? AND executed != true AND canceled != true", nameFilter, ownerFilter).
+			Where("token_name = ? AND maker = ?  AND sell = ? AND executed != true AND canceled != true",
+				nameFilter, ownerFilter, sellFilter).
 			Offset(params.offset).
 			Limit(params.limit).
 			Order(orderQuery).
@@ -82,7 +101,10 @@ func (api *MarketAPI) ListOrders(c *gin.Context) {
 			Error
 	} else {
 		err = db.
-			Where("token_name = ? AND executed != true AND canceled != true", nameFilter).
+			Where(
+				"token_name = ? AND sell = ? AND expiration_time > ? AND executed != true AND canceled != true",
+				nameFilter, sellFilter, time.Now().Unix(),
+			).
 			Offset(params.offset).
 			Limit(params.limit).
 			Order(orderQuery).
@@ -112,6 +134,7 @@ func (api *MarketAPI) ListOrders(c *gin.Context) {
 				Taker:          orderModel.Taker,
 				Input:          orderModel.Input,
 				Signature:      orderModel.Signature,
+				Sell:           orderModel.Sell,
 			})
 	}
 
@@ -158,6 +181,7 @@ func (api *MarketAPI) GetOrderDetail(c *gin.Context) {
 		Taker:          orderModel.Taker,
 		Input:          orderModel.Input,
 		Signature:      orderModel.Signature,
+		Sell:           orderModel.Sell,
 	})
 }
 
@@ -191,69 +215,124 @@ func (api *MarketAPI) CreateOrder(c *gin.Context) {
 
 	// TODO: check signature to prove that the order is created by the owner
 
-	// check owner balance
-	var ownerBalanceModel orm.TokenHolderModel
-	err = db.
-		Where("token_name = ? and address = ?", createOrderRequest.Tick, createOrderRequest.Owner).
-		First(&ownerBalanceModel).
-		Error
-	if err != nil {
-		log.Error(err)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(400, gin.H{"status": "Owner " + createOrderRequest.Owner + " does not have " + createOrderRequest.Tick})
+	if *createOrderRequest.Sell {
+		// check owner balance
+		var ownerBalanceModel orm.TokenHolderModel
+		err = db.
+			Where("token_name = ? and address = ?", createOrderRequest.Tick, createOrderRequest.Owner).
+			First(&ownerBalanceModel).
+			Error
+		if err != nil {
+			log.Error(err)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.JSON(400, gin.H{"status": "Owner " + createOrderRequest.Owner + " does not have " + createOrderRequest.Tick})
+				return
+			}
+			c.JSON(500, gin.H{"status": "ERROR"})
 			return
 		}
-		c.JSON(500, gin.H{"status": "ERROR"})
-		return
-	}
 
-	ownerBalance, _, err := util.NewDecimalFromString(ownerBalanceModel.Balance)
-	if err != nil {
-		log.Error(err)
-		c.JSON(500, gin.H{"status": "ERROR"})
-		return
-	}
-	orderQuantity, precision, err := util.NewDecimalFromString(createOrderRequest.Quantity)
-	if err != nil {
-		log.Error(err)
-		c.JSON(400, gin.H{"status": "Quantity is invalid"})
-		return
-	}
-
-	if precision > tokenModel.Decimals {
-		log.Error("Quantity Precision is invalid, req: ", c.Request)
-		c.JSON(400, gin.H{"status": "Quantity is invalid"})
-		return
-	}
-
-	if ownerBalance.Cmp(orderQuantity) == -1 {
-		log.Error("Owner does not have enough balance, req: ", c.Request)
-		c.JSON(400, gin.H{"status": "Owner does not have enough balance"})
-		return
-	}
-
-	// update owner balance
-	ownerBalance = ownerBalance.Sub(orderQuantity)
-	// if ownerBalance is 0, delete the record
-	if ownerBalance.Cmp(util.NewDecimalFromBigInt(big.NewInt(0))) == 0 {
-		err = db.
-			Delete(&ownerBalanceModel).
-			Error
+		ownerBalance, _, err := util.NewDecimalFromString(ownerBalanceModel.Balance)
 		if err != nil {
 			log.Error(err)
 			c.JSON(500, gin.H{"status": "ERROR"})
 			return
+		}
+		orderQuantity, precision, err := util.NewDecimalFromString(createOrderRequest.Quantity)
+		if err != nil {
+			log.Error(err)
+			c.JSON(400, gin.H{"status": "Quantity is invalid"})
+			return
+		}
+
+		if precision > tokenModel.Decimals {
+			log.Error("Quantity Precision is invalid, req: ", c.Request)
+			c.JSON(400, gin.H{"status": "Quantity is invalid"})
+			return
+		}
+
+		if ownerBalance.Cmp(orderQuantity) == -1 {
+			log.Error("Owner does not have enough balance, req: ", c.Request)
+			c.JSON(400, gin.H{"status": "Owner does not have enough balance"})
+			return
+		}
+
+		// update owner balance
+		ownerBalance = ownerBalance.Sub(orderQuantity)
+		// if ownerBalance is 0, delete the record
+		if ownerBalance.Cmp(util.NewDecimalFromBigInt(big.NewInt(0))) == 0 {
+			err = db.
+				Delete(&ownerBalanceModel).
+				Error
+			if err != nil {
+				log.Error(err)
+				c.JSON(500, gin.H{"status": "ERROR"})
+				return
+			}
+		} else {
+			ownerBalanceModel.Balance = ownerBalance.String()
+			err = db.
+				Model(&ownerBalanceModel).
+				Where("token_name = ? and address = ?", createOrderRequest.Tick, createOrderRequest.Owner).
+				Update("balance", ownerBalance.String()).
+				Error
+			if err != nil {
+				log.Error(err)
+				c.JSON(500, gin.H{"status": "ERROR"})
+				return
+			}
 		}
 	} else {
-		ownerBalanceModel.Balance = ownerBalance.String()
-		err = db.
-			Model(&ownerBalanceModel).
-			Where("token_name = ? and address = ?", createOrderRequest.Tick, createOrderRequest.Owner).
-			Update("balance", ownerBalance.String()).
-			Error
+		// check Tx value matches the order
+		// get tx receipt
+		web3Client, err := web3.GetWeb3Client(viper.GetString("rpcUrl"))
 		if err != nil {
 			log.Error(err)
 			c.JSON(500, gin.H{"status": "ERROR"})
+			return
+		}
+		txReceipt, err := web3.GetTxReceipt(web3Client, createOrderRequest.Tx)
+		if err != nil {
+			log.Error(err)
+			c.JSON(400, gin.H{"status": "tx invalid"})
+			return
+		}
+
+		if txReceipt.Status == 0 {
+			c.JSON(400, gin.H{"status": "tx failed"})
+			return
+		}
+
+		tx, err := web3.GetTx(web3Client, createOrderRequest.Tx)
+		if err != nil {
+			log.Error(err)
+			c.JSON(400, gin.H{"status": "tx invalid"})
+			return
+		}
+
+		totalValue, _, err := util.NewDecimalFromString(tx.Value().String())
+		if err != nil {
+			log.Error(err)
+			c.JSON(400, gin.H{"status": "tx value is invalid"})
+			return
+		}
+		orderAmount, _, err := util.NewDecimalFromString(createOrderRequest.Quantity)
+		if err != nil {
+			log.Error(err)
+			c.JSON(400, gin.H{"status": "Quantity is invalid"})
+			return
+		}
+		orderUnitPrice, _, err := util.NewDecimalFromString(createOrderRequest.UnitPrice)
+		if err != nil {
+			log.Error(err)
+			c.JSON(400, gin.H{"status": "UnitPrice is invalid"})
+			return
+		}
+		orderValue := orderAmount.Mul(orderUnitPrice)
+
+		if totalValue.Cmp(orderValue) == -1 {
+			log.Error("Tx value does not match the order, req: ", c.Request)
+			c.JSON(400, gin.H{"status": "tx value does not match the order"})
 			return
 		}
 	}
@@ -269,6 +348,7 @@ func (api *MarketAPI) CreateOrder(c *gin.Context) {
 		ExpirationTime: createOrderRequest.ExpirationTime,
 		Signature:      createOrderRequest.Signature,
 		Input:          createOrderRequest.Input,
+		Sell:           *createOrderRequest.Sell,
 	}
 
 	err = db.
@@ -294,11 +374,16 @@ func (api *MarketAPI) CreateOrder(c *gin.Context) {
 		}
 	}
 
+	activityType := "Bid"
+	if *createOrderRequest.Sell {
+		activityType = "Ask"
+	}
+
 	// create trading activity record
 	tradingActivity := orm.TradingActivityModel{
 		TokenName: orderModel.TokenName,
 		OrderId:   orderModel.ID,
-		Type:      "Listing",
+		Type:      activityType,
 		Amount:    orderModel.Amount,
 		UnitPrice: orderModel.UnitPrice,
 		CreatedAt: orderModel.CreationTime,
@@ -423,6 +508,120 @@ func (api *MarketAPI) ExecuteOrder(c *gin.Context) {
 
 	// update order
 	protocolDefault.ProcessOrderExecuted(orderExecutedEvent)
+	c.Status(200)
+}
+
+// FreezeOrder Post /orders/:id/freeze
+// freeze order
+func (api *MarketAPI) FreezeOrder(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(400, gin.H{"status": "ERROR"})
+		return
+	}
+
+	var freezeOrderRequest FreezeOrderRequest
+	err := c.ShouldBindJSON(&freezeOrderRequest)
+	if err != nil {
+		log.Error(err)
+		c.JSON(400, gin.H{"status": "Request is invalid"})
+		return
+	}
+
+	// TODO: check signature to prove that address really sent the request
+
+	// check if order exists
+	db := orm.GetDbClient()
+	var orderModel orm.OrderModel
+	err = db.
+		Where("id = ?", id).
+		First(&orderModel).
+		Error
+	if err != nil {
+		log.Error(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(404, gin.H{"status": "Order " + id + " not found"})
+			return
+		}
+		c.JSON(500, gin.H{"status": "ERROR"})
+		return
+	}
+
+	if orderModel.Sell {
+		c.JSON(400, gin.H{"status": "Order " + id + " is a ask order"})
+		return
+	}
+
+	if orderModel.Executed {
+		c.JSON(400, gin.H{"status": "Order " + id + " is already executed"})
+		return
+	}
+
+	if orderModel.Canceled {
+		c.JSON(400, gin.H{"status": "Order " + id + " is already canceled"})
+		return
+	}
+
+	// freeze user balance
+	var userBalanceModel orm.TokenHolderModel
+	err = db.
+		Where("token_name = ? and address = ?", orderModel.TokenName, freezeOrderRequest.Address).
+		First(&userBalanceModel).
+		Error
+	if err != nil {
+		log.Error(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(400, gin.H{"status": "User " + freezeOrderRequest.Address + " does not have " + orderModel.TokenName})
+			return
+		}
+		c.JSON(500, gin.H{"status": "ERROR"})
+		return
+	}
+
+	userBalance, _, err := util.NewDecimalFromString(userBalanceModel.Balance)
+	if err != nil {
+		log.Error(err)
+		c.JSON(500, gin.H{"status": "ERROR"})
+		return
+	}
+	orderAmount, _, err := util.NewDecimalFromString(orderModel.Amount)
+	if err != nil {
+		log.Error(err)
+		c.JSON(500, gin.H{"status": "ERROR"})
+		return
+	}
+
+	if userBalance.Cmp(orderAmount) == -1 {
+		log.Error("User does not have enough balance, req: ", c.Request)
+		c.JSON(400, gin.H{"status": "Insufficient balance to take the bid order"})
+		return
+	}
+
+	userBalance = userBalance.Sub(orderAmount)
+	// if userBalance is 0, delete the record
+	if userBalance.Cmp(util.NewDecimalFromBigInt(big.NewInt(0))) == 0 {
+		err = db.
+			Delete(&userBalanceModel).
+			Error
+		if err != nil {
+			log.Error(err)
+			c.JSON(500, gin.H{"status": "ERROR"})
+			return
+		}
+	} else {
+		userBalanceModel.Balance = userBalance.String()
+		err = db.
+			Model(&userBalanceModel).
+			Where("token_name = ? and address = ?", orderModel.TokenName, freezeOrderRequest.Address).
+			Update("balance", userBalance.String()).
+			Error
+		if err != nil {
+			log.Error(err)
+			c.JSON(500, gin.H{"status": "ERROR"})
+			return
+		}
+	}
+
 	c.Status(200)
 }
 
@@ -724,7 +923,7 @@ func (api *MarketAPI) ListMarketTokens(c *gin.Context) {
 	}
 
 	type DailyVolumeResult struct {
-		TokenName        string
+		TokenName   string
 		DailyVolume string
 	}
 	var dailyVolumeRes []DailyVolumeResult
@@ -847,7 +1046,6 @@ func (api *MarketAPI) GetMarketTokenDetail(c *gin.Context) {
 	for _, r := range dailyVolumeRes {
 		dailyVolumeMap[r.TokenName] = r.DailyVolume
 	}
-
 
 	c.JSON(200, MarketTokenDetail{
 		Tick:        tokenModel.Name,

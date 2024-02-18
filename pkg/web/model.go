@@ -25,25 +25,26 @@ type ListTokenResponse struct {
 }
 
 type TokenDetail struct {
-	Name            string `json:"name,omitempty"`
-	TotalSupply     string `json:"total_supply,omitempty"`
-	Decimals        int    `json:"decimals,omitempty"`
-	Minted          string `json:"minted"`
-	Holders         int64  `json:"holders"`
-	Transactions    uint64 `json:"transactions"`
-	CreationTx      string `json:"creation_tx,omitempty"`
-	CreatedAt       uint64 `json:"created_at,omitempty"`
-	CreatedBy       string `json:"created_by,omitempty"`
-	MintedOutAt     uint64 `json:"minted_out_at,omitempty"`
-	LimitPerAddress string `json:"limit_per_address,omitempty"`
-	StartBlock      uint64 `json:"start_block,omitempty"`
-	Type            string `json:"type,omitempty"`
-	Duration        uint64 `json:"duration,omitempty"`
-	IsVerified      bool   `json:"isVerified"`
-	IsOfficial      bool   `json:"isOfficial"`
+	Name         string `json:"name,omitempty"`
+	TotalSupply  string `json:"total_supply,omitempty"`
+	Decimals     int    `json:"decimals,omitempty"`
+	Minted       string `json:"minted"`
+	Holders      int64  `json:"holders"`
+	Transactions uint64 `json:"transactions"`
+	CreationTx   string `json:"creation_tx,omitempty"`
+	CreatedAt    uint64 `json:"created_at,omitempty"`
+	CreatedBy    string `json:"created_by,omitempty"`
+	MintedOutAt  uint64 `json:"minted_out_at,omitempty"`
+	Limit        string `json:"limit,omitempty"`
+	StartBlock   uint64 `json:"start_block,omitempty"`
+	Type         string `json:"type,omitempty"`
+	Duration     uint64 `json:"duration,omitempty"`
+	IsVerified   bool   `json:"isVerified"`
+	IsOfficial   bool   `json:"isOfficial"`
 }
 
 type TokenHistoryInfo struct {
+	Name        string `json:"name,omitempty"`
 	Method      string `json:"method,omitempty"`
 	From        string `json:"from,omitempty"`
 	To          string `json:"to,omitempty"`
@@ -87,6 +88,7 @@ type OrderDetail struct {
 	Taker          string `json:"taker,omitempty"`
 	Input          string `json:"input,omitempty"`
 	Signature      string `json:"signature,omitempty"`
+	Sell           bool   `json:"sell,omitempty"`
 }
 
 type ListOrdersResponse struct {
@@ -104,10 +106,11 @@ type CreateOrderRequest struct {
 	ExpirationTime uint64 `json:"expiration_time,omitempty" binding:"required"`
 	Signature      string `json:"signature,omitempty" binding:"required"`
 	Input          string `json:"input,omitempty" binding:"required"`
+	Sell           *bool  `json:"sell" binding:"required"`
 }
 
 type CancelOrderRequest struct {
-	Tx        string `json:"tx,omitempty" binding:"required"`
+	Tx string `json:"tx,omitempty" binding:"required"`
 }
 
 type TradingActivity struct {
@@ -154,5 +157,15 @@ type ListMarketTokensResponse struct {
 }
 
 type ExecuteOrderRequest struct {
-	Tx        string `json:"tx,omitempty" binding:"required"`
+	Tx string `json:"tx,omitempty" binding:"required"`
+}
+
+type FreezeOrderRequest struct {
+	Signature string `json:"signature,omitempty" binding:"required"`
+	Address   string `json:"address,omitempty" binding:"required"`
+}
+
+type ListHolderHistoriesResponse struct {
+	Total int64              `json:"total,omitempty"`
+	Data  []TokenHistoryInfo `json:"data,omitempty"`
 }

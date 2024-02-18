@@ -31,7 +31,8 @@ var (
 
 // VERC20Order is an auto generated low-level Go binding around an user-defined struct.
 type VERC20Order struct {
-	Seller         common.Address
+	Maker          common.Address
+	Sell           bool
 	ListId         [32]byte
 	Tick           string
 	Amount         *big.Int
@@ -45,7 +46,7 @@ type VERC20Order struct {
 
 // VERC20MarketMetaData contains all meta data concerning the VERC20Market contract.
 var VERC20MarketMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"ETHTransferFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpiredSignature\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MsgValueInvalid\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoOrdersMatched\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoncesInvalid\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OrderExpired\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SignatureInvalid\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SignerInvalid\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"previousAdmin\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"beacon\",\"type\":\"address\"}],\"name\":\"BeaconUpgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"EIP712DomainChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"trustedVerifier\",\"type\":\"address\"}],\"name\":\"NewTrustedVerifier\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"seller\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"listId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"timestamp\",\"type\":\"uint64\"}],\"name\":\"VERC20OrderCanceled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"seller\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"taker\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"listId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tick\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"timestamp\",\"type\":\"uint64\"}],\"name\":\"VERC20OrderExecuted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"string\",\"name\":\"ticker\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"verc20_protocol_TransferVERC20Token\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"}],\"name\":\"verc20_protocol_TransferVERC20TokenForListing\",\"type\":\"event\"},{\"stateMutability\":\"nonpayable\",\"type\":\"fallback\"},{\"inputs\":[],\"name\":\"eip712Domain\",\"outputs\":[{\"internalType\":\"bytes1\",\"name\":\"fields\",\"type\":\"bytes1\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"version\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"verifyingContract\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"salt\",\"type\":\"bytes32\"},{\"internalType\":\"uint256[]\",\"name\":\"extensions\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"seller\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"listId\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"tick\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"uint64\",\"name\":\"listingTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"expirationTime\",\"type\":\"uint64\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structVERC20Order\",\"name\":\"order\",\"type\":\"tuple\"},{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"}],\"name\":\"executeOrder\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_trustedVerifier\",\"type\":\"address\"}],\"name\":\"updateTrustedVerifier\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"}],\"name\":\"upgradeTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"addresspayable\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawETH\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawUnexpectedERC20\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"ETHTransferFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpiredSignature\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MsgValueInvalid\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoOrdersMatched\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoncesInvalid\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OrderExpired\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SignatureInvalid\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SignerInvalid\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"previousAdmin\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"beacon\",\"type\":\"address\"}],\"name\":\"BeaconUpgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"EIP712DomainChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"trustedVerifier\",\"type\":\"address\"}],\"name\":\"NewTrustedVerifier\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"maker\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"sell\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"listId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"timestamp\",\"type\":\"uint64\"}],\"name\":\"VERC20OrderCanceled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"maker\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"sell\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"taker\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"listId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tick\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"timestamp\",\"type\":\"uint64\"}],\"name\":\"VERC20OrderExecuted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"string\",\"name\":\"ticker\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"verc20_protocol_TransferVERC20Token\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"}],\"name\":\"verc20_protocol_TransferVERC20TokenForListing\",\"type\":\"event\"},{\"stateMutability\":\"nonpayable\",\"type\":\"fallback\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"maker\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"sell\",\"type\":\"bool\"},{\"internalType\":\"bytes32\",\"name\":\"listId\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"tick\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"uint64\",\"name\":\"listingTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"expirationTime\",\"type\":\"uint64\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structVERC20Order\",\"name\":\"order\",\"type\":\"tuple\"}],\"name\":\"cancelOrder\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"eip712Domain\",\"outputs\":[{\"internalType\":\"bytes1\",\"name\":\"fields\",\"type\":\"bytes1\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"version\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"verifyingContract\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"salt\",\"type\":\"bytes32\"},{\"internalType\":\"uint256[]\",\"name\":\"extensions\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"maker\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"sell\",\"type\":\"bool\"},{\"internalType\":\"bytes32\",\"name\":\"listId\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"tick\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"uint64\",\"name\":\"listingTime\",\"type\":\"uint64\"},{\"internalType\":\"uint64\",\"name\":\"expirationTime\",\"type\":\"uint64\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"internalType\":\"structVERC20Order\",\"name\":\"order\",\"type\":\"tuple\"},{\"internalType\":\"address\",\"name\":\"taker\",\"type\":\"address\"}],\"name\":\"executeOrder\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_trustedVerifier\",\"type\":\"address\"}],\"name\":\"updateTrustedVerifier\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"}],\"name\":\"upgradeTo\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"addresspayable\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawETH\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawUnexpectedERC20\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}]",
 }
 
 // VERC20MarketABI is the input ABI used to generate the binding from.
@@ -357,25 +358,46 @@ func (_VERC20Market *VERC20MarketCallerSession) ProxiableUUID() ([32]byte, error
 	return _VERC20Market.Contract.ProxiableUUID(&_VERC20Market.CallOpts)
 }
 
-// ExecuteOrder is a paid mutator transaction binding the contract method 0xf13eab1f.
+// CancelOrder is a paid mutator transaction binding the contract method 0x52327b7d.
 //
-// Solidity: function executeOrder((address,bytes32,string,uint256,uint256,uint64,uint64,uint8,bytes32,bytes32) order, address recipient) payable returns()
-func (_VERC20Market *VERC20MarketTransactor) ExecuteOrder(opts *bind.TransactOpts, order VERC20Order, recipient common.Address) (*types.Transaction, error) {
-	return _VERC20Market.contract.Transact(opts, "executeOrder", order, recipient)
+// Solidity: function cancelOrder((address,bool,bytes32,string,uint256,uint256,uint64,uint64,uint8,bytes32,bytes32) order) returns()
+func (_VERC20Market *VERC20MarketTransactor) CancelOrder(opts *bind.TransactOpts, order VERC20Order) (*types.Transaction, error) {
+	return _VERC20Market.contract.Transact(opts, "cancelOrder", order)
 }
 
-// ExecuteOrder is a paid mutator transaction binding the contract method 0xf13eab1f.
+// CancelOrder is a paid mutator transaction binding the contract method 0x52327b7d.
 //
-// Solidity: function executeOrder((address,bytes32,string,uint256,uint256,uint64,uint64,uint8,bytes32,bytes32) order, address recipient) payable returns()
-func (_VERC20Market *VERC20MarketSession) ExecuteOrder(order VERC20Order, recipient common.Address) (*types.Transaction, error) {
-	return _VERC20Market.Contract.ExecuteOrder(&_VERC20Market.TransactOpts, order, recipient)
+// Solidity: function cancelOrder((address,bool,bytes32,string,uint256,uint256,uint64,uint64,uint8,bytes32,bytes32) order) returns()
+func (_VERC20Market *VERC20MarketSession) CancelOrder(order VERC20Order) (*types.Transaction, error) {
+	return _VERC20Market.Contract.CancelOrder(&_VERC20Market.TransactOpts, order)
 }
 
-// ExecuteOrder is a paid mutator transaction binding the contract method 0xf13eab1f.
+// CancelOrder is a paid mutator transaction binding the contract method 0x52327b7d.
 //
-// Solidity: function executeOrder((address,bytes32,string,uint256,uint256,uint64,uint64,uint8,bytes32,bytes32) order, address recipient) payable returns()
-func (_VERC20Market *VERC20MarketTransactorSession) ExecuteOrder(order VERC20Order, recipient common.Address) (*types.Transaction, error) {
-	return _VERC20Market.Contract.ExecuteOrder(&_VERC20Market.TransactOpts, order, recipient)
+// Solidity: function cancelOrder((address,bool,bytes32,string,uint256,uint256,uint64,uint64,uint8,bytes32,bytes32) order) returns()
+func (_VERC20Market *VERC20MarketTransactorSession) CancelOrder(order VERC20Order) (*types.Transaction, error) {
+	return _VERC20Market.Contract.CancelOrder(&_VERC20Market.TransactOpts, order)
+}
+
+// ExecuteOrder is a paid mutator transaction binding the contract method 0x87649e4f.
+//
+// Solidity: function executeOrder((address,bool,bytes32,string,uint256,uint256,uint64,uint64,uint8,bytes32,bytes32) order, address taker) payable returns()
+func (_VERC20Market *VERC20MarketTransactor) ExecuteOrder(opts *bind.TransactOpts, order VERC20Order, taker common.Address) (*types.Transaction, error) {
+	return _VERC20Market.contract.Transact(opts, "executeOrder", order, taker)
+}
+
+// ExecuteOrder is a paid mutator transaction binding the contract method 0x87649e4f.
+//
+// Solidity: function executeOrder((address,bool,bytes32,string,uint256,uint256,uint64,uint64,uint8,bytes32,bytes32) order, address taker) payable returns()
+func (_VERC20Market *VERC20MarketSession) ExecuteOrder(order VERC20Order, taker common.Address) (*types.Transaction, error) {
+	return _VERC20Market.Contract.ExecuteOrder(&_VERC20Market.TransactOpts, order, taker)
+}
+
+// ExecuteOrder is a paid mutator transaction binding the contract method 0x87649e4f.
+//
+// Solidity: function executeOrder((address,bool,bytes32,string,uint256,uint256,uint64,uint64,uint8,bytes32,bytes32) order, address taker) payable returns()
+func (_VERC20Market *VERC20MarketTransactorSession) ExecuteOrder(order VERC20Order, taker common.Address) (*types.Transaction, error) {
+	return _VERC20Market.Contract.ExecuteOrder(&_VERC20Market.TransactOpts, order, taker)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0x8129fc1c.
@@ -1944,15 +1966,16 @@ func (it *VERC20MarketVERC20OrderCanceledIterator) Close() error {
 
 // VERC20MarketVERC20OrderCanceled represents a VERC20OrderCanceled event raised by the VERC20Market contract.
 type VERC20MarketVERC20OrderCanceled struct {
-	Seller    common.Address
+	Maker     common.Address
+	Sell      bool
 	ListId    [32]byte
 	Timestamp uint64
 	Raw       types.Log // Blockchain specific contextual infos
 }
 
-// FilterVERC20OrderCanceled is a free log retrieval operation binding the contract event 0xd6c5d1a08c3f6668da5e122de37f1abaca723a9e1634516aa64d2d60d2b832d2.
+// FilterVERC20OrderCanceled is a free log retrieval operation binding the contract event 0x374c9bc2fad2e993accd6456fa2a40f1d10d7deb18d59f0d0748f309abe77005.
 //
-// Solidity: event VERC20OrderCanceled(address seller, bytes32 listId, uint64 timestamp)
+// Solidity: event VERC20OrderCanceled(address maker, bool sell, bytes32 listId, uint64 timestamp)
 func (_VERC20Market *VERC20MarketFilterer) FilterVERC20OrderCanceled(opts *bind.FilterOpts) (*VERC20MarketVERC20OrderCanceledIterator, error) {
 
 	logs, sub, err := _VERC20Market.contract.FilterLogs(opts, "VERC20OrderCanceled")
@@ -1962,9 +1985,9 @@ func (_VERC20Market *VERC20MarketFilterer) FilterVERC20OrderCanceled(opts *bind.
 	return &VERC20MarketVERC20OrderCanceledIterator{contract: _VERC20Market.contract, event: "VERC20OrderCanceled", logs: logs, sub: sub}, nil
 }
 
-// WatchVERC20OrderCanceled is a free log subscription operation binding the contract event 0xd6c5d1a08c3f6668da5e122de37f1abaca723a9e1634516aa64d2d60d2b832d2.
+// WatchVERC20OrderCanceled is a free log subscription operation binding the contract event 0x374c9bc2fad2e993accd6456fa2a40f1d10d7deb18d59f0d0748f309abe77005.
 //
-// Solidity: event VERC20OrderCanceled(address seller, bytes32 listId, uint64 timestamp)
+// Solidity: event VERC20OrderCanceled(address maker, bool sell, bytes32 listId, uint64 timestamp)
 func (_VERC20Market *VERC20MarketFilterer) WatchVERC20OrderCanceled(opts *bind.WatchOpts, sink chan<- *VERC20MarketVERC20OrderCanceled) (event.Subscription, error) {
 
 	logs, sub, err := _VERC20Market.contract.WatchLogs(opts, "VERC20OrderCanceled")
@@ -1999,9 +2022,9 @@ func (_VERC20Market *VERC20MarketFilterer) WatchVERC20OrderCanceled(opts *bind.W
 	}), nil
 }
 
-// ParseVERC20OrderCanceled is a log parse operation binding the contract event 0xd6c5d1a08c3f6668da5e122de37f1abaca723a9e1634516aa64d2d60d2b832d2.
+// ParseVERC20OrderCanceled is a log parse operation binding the contract event 0x374c9bc2fad2e993accd6456fa2a40f1d10d7deb18d59f0d0748f309abe77005.
 //
-// Solidity: event VERC20OrderCanceled(address seller, bytes32 listId, uint64 timestamp)
+// Solidity: event VERC20OrderCanceled(address maker, bool sell, bytes32 listId, uint64 timestamp)
 func (_VERC20Market *VERC20MarketFilterer) ParseVERC20OrderCanceled(log types.Log) (*VERC20MarketVERC20OrderCanceled, error) {
 	event := new(VERC20MarketVERC20OrderCanceled)
 	if err := _VERC20Market.contract.UnpackLog(event, "VERC20OrderCanceled", log); err != nil {
@@ -2080,7 +2103,8 @@ func (it *VERC20MarketVERC20OrderExecutedIterator) Close() error {
 
 // VERC20MarketVERC20OrderExecuted represents a VERC20OrderExecuted event raised by the VERC20Market contract.
 type VERC20MarketVERC20OrderExecuted struct {
-	Seller    common.Address
+	Maker     common.Address
+	Sell      bool
 	Taker     common.Address
 	ListId    [32]byte
 	Tick      string
@@ -2090,9 +2114,9 @@ type VERC20MarketVERC20OrderExecuted struct {
 	Raw       types.Log // Blockchain specific contextual infos
 }
 
-// FilterVERC20OrderExecuted is a free log retrieval operation binding the contract event 0x4a165933be4dbff007ef2b9c46983e8cf5d6ce5d69928695ac45061c3f6fd32c.
+// FilterVERC20OrderExecuted is a free log retrieval operation binding the contract event 0x2e7b94f4cfd0f01fb59679cca0548850c180ac26c51412d95cff274ee38ba00d.
 //
-// Solidity: event VERC20OrderExecuted(address seller, address taker, bytes32 listId, string tick, uint256 amount, uint256 price, uint64 timestamp)
+// Solidity: event VERC20OrderExecuted(address maker, bool sell, address taker, bytes32 listId, string tick, uint256 amount, uint256 price, uint64 timestamp)
 func (_VERC20Market *VERC20MarketFilterer) FilterVERC20OrderExecuted(opts *bind.FilterOpts) (*VERC20MarketVERC20OrderExecutedIterator, error) {
 
 	logs, sub, err := _VERC20Market.contract.FilterLogs(opts, "VERC20OrderExecuted")
@@ -2102,9 +2126,9 @@ func (_VERC20Market *VERC20MarketFilterer) FilterVERC20OrderExecuted(opts *bind.
 	return &VERC20MarketVERC20OrderExecutedIterator{contract: _VERC20Market.contract, event: "VERC20OrderExecuted", logs: logs, sub: sub}, nil
 }
 
-// WatchVERC20OrderExecuted is a free log subscription operation binding the contract event 0x4a165933be4dbff007ef2b9c46983e8cf5d6ce5d69928695ac45061c3f6fd32c.
+// WatchVERC20OrderExecuted is a free log subscription operation binding the contract event 0x2e7b94f4cfd0f01fb59679cca0548850c180ac26c51412d95cff274ee38ba00d.
 //
-// Solidity: event VERC20OrderExecuted(address seller, address taker, bytes32 listId, string tick, uint256 amount, uint256 price, uint64 timestamp)
+// Solidity: event VERC20OrderExecuted(address maker, bool sell, address taker, bytes32 listId, string tick, uint256 amount, uint256 price, uint64 timestamp)
 func (_VERC20Market *VERC20MarketFilterer) WatchVERC20OrderExecuted(opts *bind.WatchOpts, sink chan<- *VERC20MarketVERC20OrderExecuted) (event.Subscription, error) {
 
 	logs, sub, err := _VERC20Market.contract.WatchLogs(opts, "VERC20OrderExecuted")
@@ -2139,9 +2163,9 @@ func (_VERC20Market *VERC20MarketFilterer) WatchVERC20OrderExecuted(opts *bind.W
 	}), nil
 }
 
-// ParseVERC20OrderExecuted is a log parse operation binding the contract event 0x4a165933be4dbff007ef2b9c46983e8cf5d6ce5d69928695ac45061c3f6fd32c.
+// ParseVERC20OrderExecuted is a log parse operation binding the contract event 0x2e7b94f4cfd0f01fb59679cca0548850c180ac26c51412d95cff274ee38ba00d.
 //
-// Solidity: event VERC20OrderExecuted(address seller, address taker, bytes32 listId, string tick, uint256 amount, uint256 price, uint64 timestamp)
+// Solidity: event VERC20OrderExecuted(address maker, bool sell, address taker, bytes32 listId, string tick, uint256 amount, uint256 price, uint64 timestamp)
 func (_VERC20Market *VERC20MarketFilterer) ParseVERC20OrderExecuted(log types.Log) (*VERC20MarketVERC20OrderExecuted, error) {
 	event := new(VERC20MarketVERC20OrderExecuted)
 	if err := _VERC20Market.contract.UnpackLog(event, "VERC20OrderExecuted", log); err != nil {

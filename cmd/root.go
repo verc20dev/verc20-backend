@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 var rootCmd = &cobra.Command{
@@ -23,6 +24,7 @@ var rootCmd = &cobra.Command{
 var DryRun bool
 
 func init() {
+	//viper.SetEnvPrefix("VERC")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
@@ -41,6 +43,9 @@ func init() {
 
 	viper.AutomaticEnv()
 
+	log.Info("DbHost: ", viper.GetString("dbHost"))
+	log.Info("DbHost ENV: ", os.Getenv("dbHost"))
+
 	if err := viper.ReadInConfig(); err != nil {
 		var configFileNotFoundError viper.ConfigFileNotFoundError
 		if errors.Is(err, &configFileNotFoundError) {
@@ -49,6 +54,9 @@ func init() {
 			log.Fatal(err)
 		}
 	}
+
+	log.Info("DbHost: ", viper.GetString("dbHost"))
+	log.Info("DbHost ENV: ", os.Getenv("dbHost"))
 
 	rootCmd.PersistentFlags().BoolVar(&DryRun, "dry-run", false, "run without save txs to db")
 	rootCmd.PersistentFlags().String("rpc-url", "http://localhost", "ethereum rpc url")

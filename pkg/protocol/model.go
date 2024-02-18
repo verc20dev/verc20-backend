@@ -13,7 +13,6 @@ type ProtocolType int
 
 const (
 	ERC20 ProtocolType = iota
-	ERC20_FAIR
 	UNKNOWN_PROTOCOL
 )
 
@@ -47,9 +46,6 @@ func GetProtocolType(data string, ctx *context.IndexerContext) ProtocolType {
 	ctx.TxInputUnmarshalled = target
 
 	if strings.ToLower(pStr) == "erc-20" {
-		if isFairMode(target) {
-			return ERC20_FAIR
-		}
 		return ERC20
 	}
 
@@ -63,22 +59,4 @@ func GetHandler(pType ProtocolType) Handler  {
 	} else {
 		return nil
 	}
-}
-
-func isFairMode(data map[string]interface{}) bool {
-	t, ok := data["t"]
-	if !ok {
-		return false
-	}
-
-	tStr, ok := t.(string)
-	if !ok {
-		return false
-	}
-
-	if strings.ToLower(tStr) != "fair" {
-		return false
-	}
-
-	return true
 }

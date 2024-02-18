@@ -88,6 +88,13 @@ func (h *Handler) processDeploy(tx orm.TxModel, ctx *context.IndexerContext) {
 		tokenInfo.TotalSupply = "0"
 		tokenInfo.Type = "fair"
 
+		maxSupply, precision, err := util.NewDecimalFromString(data.max)
+		// fair mode, max is optional, only process when it's valid
+		if err == nil && maxSupply.Sign() > 0 && !maxSupply.IsOverflowUint64() && precision == decimal {
+			tokenInfo.TotalSupply = data.max
+		}
+
+
 		if data.lim == "" {
 			// invalid limit, ignore
 			return
@@ -196,23 +203,29 @@ func (h *Handler) processMint(tx orm.TxModel, ctx *context.IndexerContext) {
 	mintedOut := false
 
 	if tokenInfo.Type == "fair" {
-		// fair mode, totalSupply starts from 0
-		totalSupply, _, _ := util.NewDecimalFromString(tokenInfo.TotalSupply)
+
 		limit, _, _ := util.NewDecimalFromString(tokenInfo.Limit)
 		// invalid mint amount, ignore
 		if realAmt.Sign() < 0 || realAmt.IsOverflowUint64() || realAmt.Cmp(limit) > 0 {
 			return
 		}
-		tokenInfo.TotalSupply = totalSupply.Add(realAmt).String()
+
+		// fair mode, when maxSupply is set, check if maxSupply is reached
+		// treat 0 maxSupply as unlimited
+		maxSupply, _, err := util.NewDecimalFromString(tokenInfo.TotalSupply)
+		if err == nil && maxSupply.Float64() > 0 {
+			remainAmount := maxSupply.Sub(totalMinted)
+			if realAmt.Cmp(remainAmount) > 0 {
+				// mint what's left
+				realAmt = remainAmount
+				mintedOut = true
+			}
+		}
 
 	} else {
-		// normal mode, totalSupply is fixed
+		// normal mode
 		totalSupply, _, _ := util.NewDecimalFromString(tokenInfo.TotalSupply)
 		remainAmount := totalSupply.Sub(totalMinted)
-		if realAmt.Cmp(remainAmount) > 0 {
-			// invalid mint amount, ignore
-			return
-		}
 
 		if tokenInfo.Limit != "" {
 			// ignore limit conversion error because it's already checked in deploy

@@ -73,3 +73,12 @@ func GetTxReceipt(client *ethclient.Client, txHash string) (*types.Receipt, erro
 	}
 	return receipt, nil
 }
+
+func GetTx(client *ethclient.Client, txHash string) (*types.Transaction, error) {
+	txHashObj := common.HexToHash(txHash)
+	tx, _, err := client.TransactionByHash(context.Background(), txHashObj)
+	if err != nil {
+		return nil, err
+	}
+	return tx, nil
+}
