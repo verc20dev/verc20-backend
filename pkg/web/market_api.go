@@ -15,6 +15,7 @@ import (
 	"gorm.io/gorm"
 	"math"
 	"math/big"
+	"strconv"
 	"time"
 )
 
@@ -1160,8 +1161,35 @@ func (api *MarketAPI) GetMarketTokenPrice(c *gin.Context) {
 		return
 	}
 
-	// pad missing data with previous value
+	// find the latest executed order
+
 	var prev uint64
+	var latestExecutedOrder orm.OrderModel
+	err = db.
+		Where("token_name = ? AND executed = true AND executed_at < EXTRACT(EPOCH FROM NOW() - interval '"+ interval.RealInterval +"')::BIGINT", name).
+		Order("executed_at desc").
+		First(&latestExecutedOrder).
+		Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			prev = 0
+		} else {
+			log.Error(err)
+			c.JSON(500, gin.H{"status": "ERROR"})
+			return
+		}
+	} else {
+		prev, err = strconv.ParseUint(latestExecutedOrder.UnitPrice, 10, 64)
+		if err != nil {
+			log.Error(err)
+			c.JSON(500, gin.H{"status": "ERROR"})
+			return
+		}
+	}
+
+	// pad missing data with previous value
+
+
 	c.JSON(200, util.Map(priceData, func(data PriceData) PriceData {
 		if data.Value <= 0 {
 			return PriceData{
