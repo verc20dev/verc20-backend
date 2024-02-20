@@ -7,6 +7,7 @@ import (
 	"ethsyncer/pkg/web3"
 	"ethsyncer/types"
 	"ethsyncer/util"
+	"fmt"
 	ethCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -1059,6 +1060,121 @@ func (api *MarketAPI) GetMarketTokenDetail(c *gin.Context) {
 	})
 }
 
+// GetMarketTokenPrice Get /market/tokens/:name/price
+// get market token price data
+func (api *MarketAPI) GetMarketTokenPrice(c *gin.Context) {
+	name := c.Param("name")
+	if name == "" {
+		c.JSON(400, gin.H{"status": "ERROR"})
+		return
+	}
+
+	db := orm.GetDbClient()
+
+	// find the first executed order
+	var firstExecutedOrder orm.OrderModel
+	err := db.
+		Where("token_name = ? AND executed = true", name).
+		Order("executed_at asc").
+		First(&firstExecutedOrder).
+		Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(200, []string{})
+			return
+		}
+		log.Error(err)
+		c.JSON(500, gin.H{"status": "ERROR"})
+		return
+	}
+
+	now := time.Now()
+	// first executed order between now
+	firstOrderExecutedAt := time.Unix(int64(firstExecutedOrder.ExecutedAt), 0)
+	if firstOrderExecutedAt.After(now) {
+		c.JSON(404, gin.H{"status": "Token " + name + " have no executed orders"})
+		return
+	}
+
+	allTimeDuration := getDurationInDays(now, firstOrderExecutedAt)
+	allTimeframe := getProperTimeframe(allTimeDuration)
+
+	intervalMapper := map[string]intervalData{
+		"1d": {
+			DateTrunc:      "minute",
+			RealInterval:   "1 day",
+			Timeframe:      "5 minute",
+			TimeframeInSec: 60 * 5,
+		},
+		"1w": {
+			DateTrunc:      "minute",
+			RealInterval:   "1 week",
+			Timeframe:      "15 minute",
+			TimeframeInSec: 60 * 15,
+		},
+		"1m": {
+			DateTrunc:      "minute",
+			RealInterval:   "1 month",
+			Timeframe:      "1 hour",
+			TimeframeInSec: 60 * 60,
+		},
+		"1y": {
+			DateTrunc:      "minute",
+			RealInterval:   "1 year",
+			Timeframe:      "1 day",
+			TimeframeInSec: 60 * 60 * 24,
+		},
+		"all": {
+			DateTrunc:      "minute",
+			RealInterval:   fmt.Sprintf("%d day", allTimeDuration),
+			Timeframe:      allTimeframe.String,
+			TimeframeInSec: allTimeframe.Seconds,
+		},
+	}
+
+	intervalQuery := c.DefaultQuery("interval", "1d")
+	interval, ok := intervalMapper[intervalQuery]
+	if !ok {
+		c.JSON(400, gin.H{"status": "interval is invalid"})
+		return
+	}
+
+	// get price data
+	type PriceData struct {
+		Time  uint64 `json:"time"`
+		Value uint64 `json:"value"`
+	}
+
+	var priceData []PriceData
+	err = db.
+		Raw(buildPriceQuery(interval, name)).
+		Scan(&priceData).
+		Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(200, []string{})
+			return
+		}
+		log.Error(err)
+		c.JSON(500, gin.H{"status": "ERROR"})
+		return
+	}
+
+	// pad missing data with previous value
+	var prev uint64
+	c.JSON(200, util.Map(priceData, func(data PriceData) PriceData {
+		if data.Value <= 0 {
+			return PriceData{
+				Time:  data.Time,
+				Value: prev,
+			}
+		} else {
+			prev = data.Value
+			return data
+		}
+	}))
+}
+
 func getOrderStatus(orderModel orm.OrderModel) string {
 	if orderModel.Taker != "" {
 		return "filled"
@@ -1073,4 +1189,78 @@ func getOrderStatus(orderModel orm.OrderModel) string {
 	}
 
 	return "active"
+}
+
+func getDurationInDays(time1 time.Time, time2 time.Time) int {
+	duration := time1.Sub(time2)
+	if duration.Hours() > 24 {
+		return int(math.Ceil(duration.Hours() / 24))
+	} else {
+		return 1
+	}
+}
+
+type intervalData struct {
+	DateTrunc      string
+	RealInterval   string
+	Timeframe      string
+	TimeframeInSec uint64
+}
+
+type Timeframe struct {
+	String  string
+	Seconds uint64
+}
+
+func getProperTimeframe(days int) Timeframe {
+	if days <= 1 {
+		return Timeframe{"5 minute", 60 * 5}
+	} else if days <= 7 {
+		return Timeframe{"15 minute", 60 * 15}
+	} else if days <= 30 {
+		return Timeframe{"1 hour", 60 * 60}
+	} else if days <= 365 {
+		return Timeframe{"1 day", 60 * 60 * 24}
+	} else {
+		return Timeframe{"1 week", 60 * 60 * 24 * 7}
+	}
+}
+
+func buildPriceQuery(interval intervalData, name string) string {
+	var seriesOption = "      date_trunc('hour', NOW()) - interval '" + interval.RealInterval + "' ,\n" +
+		"      date_trunc('hour', NOW()),\n" +
+		"      interval '" + interval.Timeframe + "' \n"
+	if interval.TimeframeInSec >= 60*60*24 {
+		seriesOption = "      date_trunc('day', to_timestamp(1708424221)::date) - interval '" + interval.RealInterval + "' ,\n" +
+			"      date_trunc('day', to_timestamp(1708424221)::date),\n" +
+			"      interval '" + interval.Timeframe + "' \n"
+	}
+
+	var condition = fmt.Sprintf(
+		"  orders o ON FLOOR(o.creation_time / %d) * %d = EXTRACT(EPOCH FROM t.time_interval_start)::BIGINT\n",
+		interval.TimeframeInSec, interval.TimeframeInSec,
+	)
+	if interval.TimeframeInSec >= 60*60*24 {
+		condition = "  orders o ON date_trunc('day', to_timestamp(o.creation_time)::date) = t.time_interval_start\n"
+	}
+
+
+	return "WITH all_time_intervals AS (\n" +
+		"  SELECT\n" +
+		"    generate_series(\n" +
+		seriesOption +
+		"    ) AS time_interval_start\n" +
+		")\n" +
+		"SELECT\n" +
+		"  EXTRACT(EPOCH FROM t.time_interval_start)::BIGINT as time,\n" +
+		"  COALESCE(AVG(o.unit_price::bigint), 0)::BIGINT AS value\n" +
+		"FROM\n" +
+		"  all_time_intervals t\n" +
+		"LEFT JOIN\n" +
+		condition +
+		"           AND o.executed = true AND o.token_name = '" + name + "' \n" +
+		"GROUP BY\n" +
+		"  t.time_interval_start\n" +
+		"ORDER BY\n" +
+		"  t.time_interval_start"
 }

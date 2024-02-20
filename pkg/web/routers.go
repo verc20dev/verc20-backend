@@ -159,5 +159,11 @@ func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 			"/market/activities",
 			handleFunctions.MarketAPI.ListTradingActivities,
 		},
+		{
+			"GetMarketTokenPrice",
+			http.MethodGet,
+			"/market/tokens/:name/price",
+			handleFunctions.MarketAPI.GetMarketTokenPrice,
+		},
 	}
 }
