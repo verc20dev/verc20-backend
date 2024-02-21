@@ -179,11 +179,11 @@ func (api *TokenAPI) ListToken(c *gin.Context) {
 
 		if statusFilter == "progress" {
 			baseQuery = baseQuery.
-				Where("minted_out_at = 0 AND start_block + duration > ?", currentBlock)
+				Where("minted_out_at = 0 AND case when duration > 0 then start_block + token_info.duration > ? else true end", currentBlock)
 
 		} else if statusFilter == "completed" {
 			baseQuery = baseQuery.
-				Where("minted_out_at > 0 OR start_block + duration < ?", currentBlock)
+				Where("minted_out_at > 0 OR case when duration > 0 then start_block + token_info.duration < ? else false end", currentBlock)
 		}
 	}
 
