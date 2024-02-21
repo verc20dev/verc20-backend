@@ -1281,7 +1281,7 @@ func buildPriceQuery(interval intervalData, name string) string {
 		")\n" +
 		"SELECT\n" +
 		"  EXTRACT(EPOCH FROM t.time_interval_start)::BIGINT as time,\n" +
-		"  COALESCE(AVG(o.unit_price::bigint), 0)::BIGINT AS value\n" +
+		"  COALESCE(SUM(o.unit_price::bigint * o.amount::bigint) / SUM(o.amount::bigint), 0)::BIGINT AS value\n" +
 		"FROM\n" +
 		"  all_time_intervals t\n" +
 		"LEFT JOIN\n" +
