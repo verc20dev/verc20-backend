@@ -120,6 +120,28 @@ func ProcessOrderExecuted(event *types.VERC20MarketVERC20OrderExecuted) {
 		dbc.Save(&token)
 	}
 
+	// insert transaction
+	transaction := orm.TxModel{
+		Hash:      event.Raw.TxHash.String(),
+		From:      from,
+		To:        to,
+		BlockNum:  event.Raw.BlockNumber,
+		Index:     uint64(event.Raw.Index),
+		Timestamp: event.Timestamp,
+		Input:     "",
+	}
+
+	dbc.Create(&transaction)
+
+	// update history
+	history := orm.HistoryModel{
+		TokenName: event.Tick,
+		TxId:      transaction.ID,
+		Type:      "transfer",
+		Amount:    event.Amount.String(),
+	}
+
+	dbc.Create(&history)
 }
 
 func ProcessOrderCanceled(event *types.VERC20MarketVERC20OrderCanceled) {
