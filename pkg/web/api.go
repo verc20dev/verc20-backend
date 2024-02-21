@@ -141,15 +141,59 @@ func (api *TokenAPI) ListToken(c *gin.Context) {
 		params.order = defaultOrder
 	}
 
+	nameFilter := ""
+	if tick, ok := c.GetQuery("tick"); ok && tick != "" {
+		nameFilter = tick
+	}
+
+	statusFilter := ""
+	if status, ok := c.GetQuery("status"); ok && status != "" {
+		statusFilter = status
+	}
+
+	typeFilter := ""
+	if tokenType, ok := c.GetQuery("type"); ok && tokenType != "" {
+		typeFilter = tokenType
+	}
+
 	weightOrderQuery := "sort_weight desc nulls last,"
 	orderQuery := weightOrderQuery + " " + params.sort + " " + params.order + ", created_at asc"
 
 	db := orm.GetDbClient()
 	var tokenModels []orm.TokenInfoModel
 
+	baseQuery := db.Model(&orm.TokenInfoModel{})
+
+	if nameFilter != "" {
+		baseQuery = baseQuery.
+			Where("name like ?", "%"+nameFilter+"%")
+	}
+
+	if statusFilter != "" {
+		currentBlock, err := orm.GetLatestImportedBlockNum(db)
+		if err != nil {
+			log.Error(err)
+			c.JSON(500, gin.H{"status": "ERROR"})
+			return
+		}
+
+		if statusFilter == "progress" {
+			baseQuery = baseQuery.
+				Where("minted_out_at = 0 AND start_block + duration > ?", currentBlock)
+
+		} else if statusFilter == "completed" {
+			baseQuery = baseQuery.
+				Where("minted_out_at > 0 OR start_block + duration < ?", currentBlock)
+		}
+	}
+
+	if typeFilter != "" {
+		baseQuery = baseQuery.
+			Where("type = ?", typeFilter)
+	}
+
 	var totalRow int64
-	err := db.
-		Model(&orm.TokenInfoModel{}).
+	err := baseQuery.
 		Count(&totalRow).
 		Error
 	if err != nil {
@@ -158,7 +202,7 @@ func (api *TokenAPI) ListToken(c *gin.Context) {
 		return
 	}
 
-	err = db.
+	err = baseQuery.
 		Offset(params.offset).
 		Limit(params.limit).
 		Order(orderQuery).
