@@ -12,7 +12,7 @@ import (
 type ProtocolType int
 
 const (
-	ERC20 ProtocolType = iota
+	VERC20 ProtocolType = iota
 	UNKNOWN_PROTOCOL
 )
 
@@ -45,8 +45,8 @@ func GetProtocolType(data string, ctx *context.IndexerContext) ProtocolType {
 	}
 	ctx.TxInputUnmarshalled = target
 
-	if strings.ToLower(pStr) == "erc-20" {
-		return ERC20
+	if strings.ToLower(pStr) == "verc-20" {
+		return VERC20
 	}
 
 	return UNKNOWN_PROTOCOL
@@ -54,7 +54,7 @@ func GetProtocolType(data string, ctx *context.IndexerContext) ProtocolType {
 
 
 func GetHandler(pType ProtocolType) Handler  {
-	if pType == ERC20 {
+	if pType == VERC20 {
 		return &_default.Handler{}
 	} else {
 		return nil
